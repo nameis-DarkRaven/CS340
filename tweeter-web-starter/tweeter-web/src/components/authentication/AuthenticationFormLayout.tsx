@@ -1,4 +1,6 @@
 import OAuth from "./OAuth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 interface Props {
   headingText: string;
@@ -30,7 +32,14 @@ const AuthenticationFormLayout = (props: Props) => {
 
           <h1 className="h4 mb-3 fw-normal">Or</h1>
           <h1 className="h5 mb-3 fw-normal">{props.oAuthHeading}</h1>
-          <OAuth />
+          <div className="text-center mb-3">
+            <OAuth platform="Google" />
+            <OAuth platform="Facebook" />
+            <OAuth platform="Twitter" />
+            <OAuth platform="LinkedIn" />
+            <OAuth platform="GitHub" />
+          </div>
+
           <div className="checkbox mb-3">
             <label>
               <input
