@@ -3,8 +3,9 @@ import { ChangeEvent } from "react";
 import { AuthToken } from "tweeter-shared/dist/model/domain/AuthToken";
 import { User } from "tweeter-shared/dist/model/domain/User";
 import { UserService } from "../model.service/UserService";
+import { Presenter, View } from "./Presenter";
 
-export interface RegisterView {
+export interface RegisterView extends View {
   navigate: (path: string) => void;
   updateUserInfo: (
     user: User,
@@ -12,25 +13,15 @@ export interface RegisterView {
     authToken: AuthToken,
     rememberMe: boolean,
   ) => void;
-  displayErrorMessage: (message: string) => void;
   setIsLoading: (isLoading: boolean) => void;
   setImageUrl: (imageUrl: string) => void;
 }
 
-export class RegisterPresenter {
-  private view: RegisterView;
-  private service: UserService;
-  private imageBytes: Uint8Array;
-  private rememberMe: boolean;
-  private imageFileExtension: string;
-
-  public constructor(view: RegisterView) {
-    this.view = view;
-    this.service = new UserService();
-    this.imageBytes = new Uint8Array();
-    this.rememberMe = false;
-    this.imageFileExtension = "";
-  }
+export class RegisterPresenter extends Presenter<RegisterView> {
+  private service: UserService = new UserService();
+  private imageBytes: Uint8Array = new Uint8Array();
+  private rememberMe: boolean = false;
+  private imageFileExtension: string = "";
 
   public checkSubmitButtonStatus(
     firstName: string,
@@ -120,27 +111,25 @@ export class RegisterPresenter {
     alias: string,
     password: string,
   ) {
-    try {
-      this.view.setIsLoading(true);
+    this.doFailureReportingOperation(
+      async () => {
+        this.view.setIsLoading(true);
 
-      const [user, authToken] = await this.service.register(
-        firstName,
-        lastName,
-        alias,
-        password,
-        this.imageBytes,
-        this.imageFileExtension,
-      );
+        const [user, authToken] = await this.service.register(
+          firstName,
+          lastName,
+          alias,
+          password,
+          this.imageBytes,
+          this.imageFileExtension,
+        );
 
-      this.view.updateUserInfo(user, user, authToken, this.rememberMe);
-      this.view.navigate(`/feed/${user.alias}`);
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to register user because of exception: ${error}`,
-      );
-    } finally {
-      this.view.setIsLoading(false);
-    }
+        this.view.updateUserInfo(user, user, authToken, this.rememberMe);
+        this.view.navigate(`/feed/${user.alias}`);
+      },
+      "register user",
+      () => this.view.setIsLoading(false),
+    );
   }
 
   public set RememberMe(rememberMe: boolean) {

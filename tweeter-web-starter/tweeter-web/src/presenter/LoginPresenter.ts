@@ -1,7 +1,8 @@
 import { User, AuthToken } from "tweeter-shared";
 import { UserService } from "../model.service/UserService";
+import { Presenter, View } from "./Presenter";
 
-export interface LoginView {
+export interface LoginView extends View {
   displayErrorMessage: (message: string) => void;
   navigate: (featurePath: string) => void;
   updateUserInfo: (
@@ -10,17 +11,15 @@ export interface LoginView {
     authToken: AuthToken,
     rememberMe: boolean,
   ) => void;
+  setIsLoading: (isLoading: boolean) => void;
 }
 
-export class LoginPresenter {
-  private isLoading: boolean;
-  private view: LoginView;
+export class LoginPresenter extends Presenter<LoginView> {
   private userService: UserService;
   private rememberMe: boolean;
 
   public constructor(view: LoginView) {
-    this.view = view;
-    this.isLoading = false;
+    super(view);
     this.userService = new UserService();
     this.rememberMe = false;
   }
@@ -30,25 +29,23 @@ export class LoginPresenter {
     alias: string,
     password: string,
   ) {
-    try {
-      this.isLoading = true;
+    this.doFailureReportingOperation(
+      async () => {
+        this.view.setIsLoading(true);
 
-      const [user, authToken] = await this.userService.login(alias, password);
+        const [user, authToken] = await this.userService.login(alias, password);
 
-      this.view.updateUserInfo(user, user, authToken, this.rememberMe);
+        this.view.updateUserInfo(user, user, authToken, this.rememberMe);
 
-      if (!!props.originalUrl) {
-        this.view.navigate(props.originalUrl);
-      } else {
-        this.view.navigate(`/feed/${user.alias}`);
-      }
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to log user in because of exception: ${error}`,
-      );
-    } finally {
-      this.isLoading = false;
-    }
+        if (!!props.originalUrl) {
+          this.view.navigate(props.originalUrl);
+        } else {
+          this.view.navigate(`/feed/${user.alias}`);
+        }
+      },
+      "log user in",
+      () => this.view.setIsLoading(false),
+    );
   }
 
   public checkSubmitButtonStatus = (
@@ -74,9 +71,5 @@ export class LoginPresenter {
 
   public set RememberMe(rememberMe: boolean) {
     this.rememberMe = rememberMe;
-  }
-
-  public get IsLoading(): boolean {
-    return this.isLoading;
   }
 }
