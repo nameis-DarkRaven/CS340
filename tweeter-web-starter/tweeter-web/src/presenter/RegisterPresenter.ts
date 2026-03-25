@@ -1,26 +1,15 @@
 import { Buffer } from "buffer";
 import { ChangeEvent } from "react";
-import { AuthToken } from "tweeter-shared/dist/model/domain/AuthToken";
-import { User } from "tweeter-shared/dist/model/domain/User";
 import { UserService } from "../model.service/UserService";
-import { Presenter, View } from "./Presenter";
+import { AuthPresenter, AuthView } from "./AuthPresenter";
 
-export interface RegisterView extends View {
-  navigate: (path: string) => void;
-  updateUserInfo: (
-    user: User,
-    displayedUser: User,
-    authToken: AuthToken,
-    rememberMe: boolean,
-  ) => void;
-  setIsLoading: (isLoading: boolean) => void;
+export interface RegisterView extends AuthView {
   setImageUrl: (imageUrl: string) => void;
 }
 
-export class RegisterPresenter extends Presenter<RegisterView> {
+export class RegisterPresenter extends AuthPresenter<RegisterView> {
   private service: UserService = new UserService();
   private imageBytes: Uint8Array = new Uint8Array();
-  private rememberMe: boolean = false;
   private imageFileExtension: string = "";
 
   public checkSubmitButtonStatus(
@@ -70,39 +59,23 @@ export class RegisterPresenter extends Presenter<RegisterView> {
   };
 
   private handleImageFile(file: File | undefined): void {
-    if (file) {
-      this.view.setImageUrl(URL.createObjectURL(file));
-
-      const reader = new FileReader();
-      reader.onload = (event: ProgressEvent<FileReader>) => {
-        const imageStringBase64 = event.target?.result as string;
-
-        // Remove unnecessary file metadata from the start of the string.
-        const imageStringBase64BufferContents =
-          imageStringBase64.split("base64,")[1];
-
-        const bytes: Uint8Array = Buffer.from(
-          imageStringBase64BufferContents,
-          "base64",
-        );
-
-        this.imageBytes = bytes;
-      };
-      reader.readAsDataURL(file);
-
-      // Set image file extension (and move to a separate method)
-      const fileExtension = this.getFileExtension(file);
-      if (fileExtension) {
-        this.imageFileExtension = fileExtension;
-      }
-    } else {
+    if (!file) {
       this.view.setImageUrl("");
       this.imageBytes = new Uint8Array();
+      return;
     }
-  }
 
-  private getFileExtension(file: File): string | undefined {
-    return file.name.split(".").pop();
+    this.view.setImageUrl(URL.createObjectURL(file));
+
+    const reader = new FileReader();
+    reader.onload = (event: ProgressEvent<FileReader>) => {
+      const base64 = (event.target?.result as string).split("base64,")[1];
+      this.imageBytes = Buffer.from(base64, "base64");
+    };
+    reader.readAsDataURL(file);
+
+    const fileExtension = file.name.split(".").pop();
+    if (fileExtension) this.imageFileExtension = fileExtension;
   }
 
   public async doRegister(
@@ -111,28 +84,18 @@ export class RegisterPresenter extends Presenter<RegisterView> {
     alias: string,
     password: string,
   ) {
-    this.doFailureReportingOperation(
-      async () => {
-        this.view.setIsLoading(true);
-
-        const [user, authToken] = await this.service.register(
+    this.handleAuthOperation(
+      () =>
+        this.service.register(
           firstName,
           lastName,
           alias,
           password,
           this.imageBytes,
           this.imageFileExtension,
-        );
-
-        this.view.updateUserInfo(user, user, authToken, this.rememberMe);
-        this.view.navigate(`/feed/${user.alias}`);
-      },
+        ),
       "register user",
-      () => this.view.setIsLoading(false),
+      (user) => `/feed/${user.alias}`,
     );
-  }
-
-  public set RememberMe(rememberMe: boolean) {
-    this.rememberMe = rememberMe;
   }
 }
