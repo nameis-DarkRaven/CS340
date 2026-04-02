@@ -1,0 +1,284 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "2026-03-06T00:59:53Z",
+    "title" : "apiGatewayExercise"
+  },
+  "host" : "1j1k3r33r7.execute-api.us-east-1.amazonaws.com",
+  "basePath" : "/apiGatewayExercise",
+  "schemes" : [ "https" ],
+  "paths" : {
+    "/sendemail" : {
+      "post" : {
+        "description" : "Used to send an email without mapping.",
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "schema" : {
+              "$ref" : "#/definitions/Empty"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:557690601110:function:sendEmail/invocations",
+          "httpMethod" : "POST",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200"
+            }
+          },
+          "passthroughBehavior" : "when_no_match",
+          "timeoutInMillis" : 29000,
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws"
+        }
+      },
+      "options" : {
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "schema" : {
+              "$ref" : "#/definitions/Empty"
+            },
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Methods" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Headers" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/sendemail/{to}" : {
+      "options" : {
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "to",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "schema" : {
+              "$ref" : "#/definitions/Empty"
+            },
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Methods" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Headers" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/sendemail/{to}/{from}" : {
+      "post" : {
+        "description" : "Used to send an email with mapping.",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "EmailSubject",
+          "in" : "header",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "EmailText",
+          "in" : "header",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "from",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "to",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "schema" : {
+              "$ref" : "#/definitions/Empty"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:557690601110:function:sendEmail/invocations",
+          "httpMethod" : "POST",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200"
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\r\n\r\n\"to\": \"$input.params('to')\",\r\n\"from\": \"$input.params('from')\",\r\n\"subject\": \"$input.params('EmailSubject')\",\r\n\"textBody\": \"$input.params('EmailText')\",\r\n\"htmlBody\": \"$input.params('EmailText')\"\r\n\r\n}"
+          },
+          "passthroughBehavior" : "never",
+          "timeoutInMillis" : 29000,
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws"
+        }
+      },
+      "options" : {
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "to",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "from",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "schema" : {
+              "$ref" : "#/definitions/Empty"
+            },
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Methods" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Headers" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "Empty" : {
+      "type" : "object",
+      "title" : "Empty Schema"
+    }
+  },
+  "x-amazon-apigateway-documentation" : {
+    "version" : "1",
+    "createdDate" : "2026-03-06T01:17:03Z",
+    "documentationParts" : [ {
+      "location" : {
+        "type" : "METHOD",
+        "path" : "/sendemail/{to}/{from}",
+        "method" : "POST"
+      },
+      "properties" : {
+        "description" : "Used to send an email with mapping."
+      }
+    }, {
+      "location" : {
+        "type" : "METHOD",
+        "path" : "/sendemail",
+        "method" : "POST"
+      },
+      "properties" : {
+        "description" : "Used to send an email without mapping."
+      }
+    }, {
+      "location" : {
+        "type" : "RESOURCE",
+        "path" : "/sendemail/{to}/{from}"
+      },
+      "properties" : {
+        "description" : "Allows from-email to be specified through http request url."
+      }
+    }, {
+      "location" : {
+        "type" : "RESOURCE",
+        "path" : "/sendemail/{to}"
+      },
+      "properties" : {
+        "description" : "Allows to-email to be specified through http request url."
+      }
+    }, {
+      "location" : {
+        "type" : "RESOURCE",
+        "path" : "/sendemail"
+      },
+      "properties" : {
+        "description" : "Send an email."
+      }
+    } ]
+  },
+  "x-amazon-apigateway-security-policy" : "TLS_1_0"
+}
